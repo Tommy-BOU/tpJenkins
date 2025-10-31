@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        label 'newNode'
+    }
 
     stages {
 
@@ -19,7 +21,7 @@ pipeline {
             steps {
                 echo "Récupération du code source..."
                 // Exemple avec Git : adapte l’URL selon ton dépôt
-                git branch: 'main', url: 'https://github.com/utilisateur/mon-site-statique.git'
+                git branch: 'main', url: 'https://github.com/Tommy-BOU/tpJenkins
             }
         }
 

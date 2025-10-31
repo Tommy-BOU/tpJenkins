@@ -21,7 +21,7 @@ pipeline {
             steps {
                 echo "Récupération du code source..."
                 // Exemple avec Git : adapte l’URL selon ton dépôt
-                git branch: 'main', url: 'https://github.com/Tommy-BOU/tpJenkins
+                git branch: 'main', url: 'https://github.com/Tommy-BOU/tpJenkins'
             }
         }
 

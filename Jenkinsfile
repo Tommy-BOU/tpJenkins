@@ -1,57 +1,70 @@
 pipeline {
-  agent any
+    agent any
 
-  stages {
-    stage("Dependances") {
-      steps {
-        // Installer apache2
-        sh "apt install apache2 -y"
-      }
+    stages {
+
+        stage("Dependances") {
+            steps {
+                echo "Installation d'Apache2..."
+                sh '''
+                    sudo apt-get update -y
+                    sudo apt-get install -y apache2
+                    sudo systemctl start apache2
+                    sudo systemctl enable apache2
+                '''
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                echo "Récupération du code source..."
+                // Exemple avec Git : adapte l’URL selon ton dépôt
+                git branch: 'main', url: 'https://github.com/utilisateur/mon-site-statique.git'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo "Déploiement de l’application web statique..."
+                sh '''
+                    sudo rm -rf /var/www/html/*
+                    sudo cp -r * /var/www/html/
+                    sudo chown -R www-data:www-data /var/www/html
+                    sudo systemctl restart apache2
+                '''
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo "Vérification du déploiement..."
+                sh '''
+                    STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" http://localhost)
+                    if [ "$STATUS_CODE" -ne 200 ]; then
+                        echo "Le site ne répond pas correctement (code: $STATUS_CODE)"
+                        exit 1
+                    else
+                        echo "Le site est déployé et accessible (HTTP 200)"
+                    fi
+                '''
+            }
+        }
     }
 
-    stage('Checkout') {
-      steps {
-        // Récupération du code
-        sh "git clone https://github.com/Tommy-BOU/tpJenkins/"
-      }
+    post {
+        success {
+            echo "✅ Déploiement réussi !"
+        }
+        failure {
+            echo "❌ Échec du pipeline. Vérifiez les logs."
+        }
+        always {
+            echo "Nettoyage du serveur..."
+            sh '''
+                sudo rm -rf /var/www/html/*
+                sudo apt-get remove -y apache2
+                sudo apt-get autoremove -y
+            '''
+        }
     }
-
-    stage('Deploy') {
-      steps {
-        // Copie des fichiers vers le serveur web (/var/www/html/)
-        echo 'building the app....'
-        sh 'cp -r * /var/www/html/'
-      }
-    }
-
-    stage('Test') {
-      steps {
-        // Vérification du déploiement
-        sh ''''
-            cd var/www/html/
-            index.html || true
-          '''
-      }
-    }
-  }
-
-  post {
-    success {
-      // Action en cas de succès (echo, ou autre)
-      echo "Success !"
-    }
-
-    failure {
-      // Action en cas d'échec
-      echo "Failuret"
-    }
-
-    always {
-      // Nettoyage
-      // Supprimer les fichiers copiés dans /var/www/html
-      echo 'clean up directory'
-      sh 'rm -rf /var/www/html/* '
-      // Desinstaller apache2
-    }
-  }
 }

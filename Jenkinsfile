@@ -5,7 +5,7 @@ pipeline {
     stage("Dependances") {
       steps {
         // Installer apache2
-        sh "sudo apt install apache2 -y"
+        sh "apt install apache2 -y"
       }
     }
 

@@ -31,6 +31,7 @@ pipeline {
                 sh '''
                     sudo rm -rf /var/www/html/*
                     sudo cp -r * /var/www/html/
+                    cat index.html
                     sudo chown -R www-data:www-data /var/www/html
                     sudo systemctl restart apache2
                 '''
@@ -47,6 +48,7 @@ pipeline {
                         exit 1
                     else
                         echo "Le site est déployé et accessible (HTTP 200)"
+                        
                     fi
                 '''
             }
